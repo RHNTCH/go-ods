@@ -1,0 +1,15 @@
+# macOS
+.DS_Store
+._*
+
+# Go build artifacts
+example1
+*.test
+*.out
+
+# Local output
+output.json
+
+# Optional: real word files
+testdata/*.ods
+testdata/*.zip
