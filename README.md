@@ -153,6 +153,11 @@ inside that width are preserved in `Headers`, but they are not added to
 This behavior helps ignore empty formatted cells that can appear in ODS files
 when a sheet has styles applied far beyond the actual data range.
 
+`MakeTable` stores both row-oriented and column-oriented views of the sheet.
+This uses more memory than streaming iteration, but makes it convenient to read
+data by row, column index, or column name. For large files or one-pass
+processing, prefer the streaming and callback APIs.
+
 ## Streaming Notes
 
 `go-ods` reads the XML stream from start to finish. This means a `Reader` is
