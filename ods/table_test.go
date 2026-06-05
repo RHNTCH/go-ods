@@ -11,7 +11,13 @@ import (
 	"github.com/RHNTCH/go-ods/model"
 )
 
-func writeTestODS(t *testing.T, content string) string {
+type testHelper interface {
+	Helper()
+	Fatal(args ...any)
+	TempDir() string
+}
+
+func writeTestODS(t testHelper, content string) string {
 	t.Helper()
 
 	path := filepath.Join(t.TempDir(), "test.ods")

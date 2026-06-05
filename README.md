@@ -222,6 +222,23 @@ go test ./model -cover
 go test ./ods -cover
 ```
 
+## Benchmarks
+
+Run synthetic benchmarks:
+
+```bash
+go test ./ods -bench=. -benchmem
+```
+
+To benchmark a real file, pass the path and sheet name through environment
+variables:
+
+```bash
+GO_ODS_BENCH_FILE="../testdata/signals.ods" \
+GO_ODS_BENCH_SHEET="AP" \
+go test ./ods -bench=RealFile -benchmem
+```
+
 ## Roadmap
 
 - tests for more OpenDocument edge cases;
