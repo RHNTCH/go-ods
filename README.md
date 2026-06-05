@@ -40,6 +40,9 @@ go get github.com/RHNTCH/go-ods
 
 ## Basic Usage
 
+`MakeTable` is the easiest way to read a sheet when you want convenient
+in-memory access by rows, columns, and header names.
+
 ```go
 package main
 
@@ -47,31 +50,27 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/RHNTCH/go-ods/model"
 	"github.com/RHNTCH/go-ods/ods"
 )
 
 func main() {
-	reader, err := ods.Open("testdata/testfile_MNS.ods")
+	reader, err := ods.Open("signals.ods")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer reader.Close()
 
-	err = reader.ForEachRow(func(sheet ods.SheetInfo, row model.Row) error {
-		fmt.Println("Sheet:", sheet.Name)
-
-		for _, cell := range row.Cells {
-			fmt.Print(cell.Formatted, " | ")
-		}
-
-		fmt.Println()
-		return nil
-	})
-
+	table, err := reader.MakeTable("AP")
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	tag, ok := table.CellByName(0, "object_tag")
+	if !ok {
+		log.Fatal("object_tag column not found")
+	}
+
+	fmt.Println(tag.Formatted)
 }
 ```
 
@@ -81,7 +80,7 @@ The lower-level API uses iterators. This style gives more control over the
 parsing process.
 
 ```go
-reader, err := ods.Open("testdata/testfile_MNS.ods")
+reader, err := ods.Open("signals.ods")
 if err != nil {
 	log.Fatal(err)
 }
@@ -110,7 +109,8 @@ if err := sheets.Err(); err != nil {
 
 ## Callback Helpers
 
-For simpler tasks, the library provides callback helpers.
+For one-pass processing, the library provides callback helpers. This API keeps
+memory usage low and is a better fit for large files or generator pipelines.
 
 ```go
 err := reader.ForEachSheet(func(sheet *ods.SheetCursor) error {
@@ -131,6 +131,29 @@ err := reader.ForEachRow(func(sheet ods.SheetInfo, row model.Row) error {
 If the callback returns an error, iteration stops and the error is returned to
 the caller.
 
+To process a specific sheet, use `ForSheet`:
+
+```go
+err := reader.ForSheet("AP", func(sheet *ods.SheetCursor) error {
+	rows := sheet.Rows()
+	for rows.Next() {
+		row := rows.Row()
+		fmt.Println(len(row.Cells))
+	}
+
+	return rows.Err()
+})
+```
+
+To process a set of sheets, use `ForSheets`:
+
+```go
+err := reader.ForSheets([]string{"AP", "DI"}, func(sheet *ods.SheetCursor) error {
+	fmt.Println("Sheet:", sheet.Sheet.Name)
+	return nil
+})
+```
+
 ## In-Memory Table API
 
 `MakeTable` reads one sheet into memory and returns a `model.Table`.
@@ -143,6 +166,16 @@ if err != nil {
 
 fmt.Println(table.Headers)
 fmt.Println(table.HeaderIndexes)
+```
+
+`model.Table` provides helper methods for common access patterns:
+
+```go
+fmt.Println(table.Width())
+fmt.Println(table.Height())
+
+column, ok := table.ColumnByName("object_id")
+cell, ok := table.CellByName(0, "object_tag")
 ```
 
 This API assumes that the first row of the sheet is a header row. The logical
@@ -176,3 +209,22 @@ defer reader.Close()
 ## Example
 
 See [examples/example1.go](examples/example1.go).
+
+```bash
+go run ./examples signals.ods AP
+```
+
+## Testing
+
+```bash
+go test ./...
+go test ./model -cover
+go test ./ods -cover
+```
+
+## Roadmap
+
+- tests for more OpenDocument edge cases;
+- benchmarks for streaming and table-building APIs;
+- support for repeated rows;
+- CLI tools and configuration generators built on top of the library.
