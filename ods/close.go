@@ -1,5 +1,6 @@
 package ods
 
+// Close closes the underlying content stream and zip reader.
 func (r *Reader) Close() error {
 	var err error
 

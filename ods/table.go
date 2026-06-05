@@ -2,6 +2,7 @@ package ods
 
 import "github.com/RHNTCH/go-ods/model"
 
+// MakeTable reads a sheet into memory using the first row as headers.
 func (r *Reader) MakeTable(sheetName string) (model.Table, error) {
 	table := model.Table{
 		Name: sheetName,

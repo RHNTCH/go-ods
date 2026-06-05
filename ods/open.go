@@ -6,6 +6,7 @@ import (
 	"errors"
 )
 
+// Open opens an ODS file and prepares a streaming reader for its content.xml.
 func Open(path string) (*Reader, error) {
 
 	zr, err := zip.OpenReader(path)

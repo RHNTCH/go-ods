@@ -2,6 +2,7 @@ package ods
 
 import "github.com/RHNTCH/go-ods/model"
 
+// ForEachRow calls fn for every row in every sheet.
 func (r *Reader) ForEachRow(
 	fn func(sheet SheetInfo, row model.Row) error,
 ) error {
@@ -21,6 +22,7 @@ func (r *Reader) ForEachRow(
 	})
 }
 
+// ForEachSheet calls fn for every sheet in the file.
 func (r *Reader) ForEachSheet(fn func(sheet *SheetCursor) error) error {
 	sheets := r.Sheets()
 
@@ -33,6 +35,7 @@ func (r *Reader) ForEachSheet(fn func(sheet *SheetCursor) error) error {
 	return sheets.Err()
 }
 
+// ForSheet calls fn for the first sheet matching name.
 func (r *Reader) ForSheet(name string, fn func(sheet *SheetCursor) error) error {
 	sheets := r.Sheets()
 
@@ -56,6 +59,7 @@ func (r *Reader) ForSheet(name string, fn func(sheet *SheetCursor) error) error 
 	return ErrSheetNotFound
 }
 
+// ForSheets calls fn for each sheet whose name is listed in names.
 func (r *Reader) ForSheets(names []string, fn func(sheet *SheetCursor) error) error {
 	targetSheets := make(map[string]bool, len(names))
 	for _, name := range names {

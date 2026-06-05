@@ -14,14 +14,17 @@ type SheetIterator struct {
 	err     error
 }
 
+// Sheet returns the current sheet cursor.
 func (it *SheetIterator) Sheet() *SheetCursor {
 	return it.current
 }
 
+// Err returns the first error encountered by the iterator.
 func (it *SheetIterator) Err() error {
 	return it.err
 }
 
+// Next advances the iterator to the next sheet.
 func (it *SheetIterator) Next() bool {
 	for {
 		token, err := it.decoder.Token()

@@ -10,6 +10,7 @@ const (
 	CellTypeDate
 )
 
+// Cell contains raw, formatted, typed, and formula data parsed from an ODS cell.
 type Cell struct {
 	Type CellType
 

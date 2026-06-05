@@ -1,16 +1,16 @@
 package model
 
-// Width returns width of the table by num of headers
+// Width returns the number of logical table columns.
 func (t Table) Width() int {
 	return len(t.Headers)
 }
 
-// Height returns height of table by num of rows including header
+// Height returns the number of data rows in the table.
 func (t Table) Height() int {
 	return len(t.Rows)
 }
 
-// ColumnIndexes returns indexes of columns by it's header
+// ColumnIndexes returns all column indexes matching a header name.
 func (t Table) ColumnIndexes(name string) ([]int, bool) {
 	val, ok := t.HeaderIndexes[name]
 
@@ -21,14 +21,14 @@ func (t Table) ColumnIndexes(name string) ([]int, bool) {
 	return val, true
 }
 
-// ColumnByIndex returns columns by it's index
+// ColumnByIndex returns a column by its zero-based index.
 func (t Table) ColumnByIndex(index int) ([]Cell, bool) {
 	column, ok := t.Columns[index]
 	return column, ok
 }
 
-// ColumnByName returns column by it's header.
-// Also returns nil, if column's name isn't unique
+// ColumnByName returns a column by header name.
+// It returns false if the header is missing or not unique.
 func (t Table) ColumnByName(name string) ([]Cell, bool) {
 	indexes := t.HeaderIndexes[name]
 
@@ -39,7 +39,7 @@ func (t Table) ColumnByName(name string) ([]Cell, bool) {
 	return t.ColumnByIndex(indexes[0])
 }
 
-// Cell returns type Cell by it's coordinates
+// Cell returns a cell by zero-based row and column indexes.
 func (t Table) Cell(rowIndex, columnIndex int) (Cell, bool) {
 
 	if rowIndex < 0 || rowIndex >= len(t.Rows) {
@@ -55,8 +55,8 @@ func (t Table) Cell(rowIndex, columnIndex int) (Cell, bool) {
 	return row.Cells[columnIndex], true
 }
 
-// CellByName returns cell by header and row num
-// if header is not unique CellByName returns false
+// CellByName returns a cell by row index and header name.
+// It returns false if the header is missing, not unique, or the row is out of range.
 func (t Table) CellByName(rowIndex int, columnName string) (Cell, bool) {
 	columnIndexes, ok := t.ColumnIndexes(columnName)
 

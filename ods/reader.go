@@ -12,6 +12,7 @@ type Reader struct {
 	content   io.ReadCloser
 }
 
+// Sheets returns an iterator over sheets in the ODS file.
 func (r *Reader) Sheets() *SheetIterator {
 	return &SheetIterator{
 		decoder: r.decoder,

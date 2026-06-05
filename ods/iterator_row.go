@@ -14,20 +14,24 @@ type RowIterator struct {
 	err     error
 }
 
+// Rows returns an iterator over rows in the current sheet.
 func (s *SheetCursor) Rows() *RowIterator {
 	return &RowIterator{
 		decoder: s.decoder,
 	}
 }
 
+// Row returns the current row.
 func (it *RowIterator) Row() model.Row {
 	return it.current
 }
 
+// Err returns the first error encountered by the iterator.
 func (it *RowIterator) Err() error {
 	return it.err
 }
 
+// Next advances the iterator to the next row.
 func (it *RowIterator) Next() bool {
 	for {
 		token, err := it.decoder.Token()
