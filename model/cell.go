@@ -8,6 +8,7 @@ const (
 	CellTypeFloat
 	CellTypeBool
 	CellTypeDate
+	CellTypeUnknown
 )
 
 // Cell contains raw, formatted, typed, and formula data parsed from an ODS cell.
@@ -21,7 +22,8 @@ type Cell struct {
 	Time   time.Time
 
 	// raw xml values
-	Raw string
+	ValueType string
+	Raw       string
 
 	// displayed text
 	Formatted string

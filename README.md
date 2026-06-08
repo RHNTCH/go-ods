@@ -20,6 +20,7 @@ Currently supported:
 - iterating over sheets;
 - iterating over rows;
 - reading cell text, raw values, formulas, and basic typed values;
+- preserving unsupported ODS value types for later handling;
 - handling repeated columns;
 - building an in-memory table from a sheet with `MakeTable`;
 - simple callback helpers for common processing tasks.
@@ -178,6 +179,35 @@ column, ok := table.ColumnByName("object_id")
 cell, ok := table.CellByName(0, "object_tag")
 ```
 
+## Typed Cell Values
+
+Cells preserve their displayed text, raw XML value, formula, and parsed type.
+Use `Value` to retrieve a value using its Go type:
+
+```go
+value, err := cell.Value()
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Printf("%T: %v\n", value, value)
+```
+
+Currently supported typed values:
+
+| ODS value type | Go value returned by `Cell.Value()` |
+| --- | --- |
+| `string` | `string` |
+| `float` | `float64` |
+| `boolean` | `bool` |
+| `date` | `time.Time` |
+| empty cell | `nil` |
+
+Unsupported ODS value types are preserved as `CellTypeUnknown`. Their original
+type remains available in `Cell.ValueType`, while `Cell.Value()` returns
+`model.ErrUndefinedCellType`. The raw and formatted cell values remain
+available.
+
 This API assumes that the first row of the sheet is a header row. The logical
 table width is determined by the last non-empty header cell. Empty header cells
 inside that width are preserved in `Headers`, but they are not added to
@@ -242,6 +272,6 @@ go test ./ods -bench=RealFile -benchmem
 ## Roadmap
 
 - tests for more OpenDocument edge cases;
-- benchmarks for streaming and table-building APIs;
+- support for additional ODS value types;
 - support for repeated rows;
 - CLI tools and configuration generators built on top of the library.

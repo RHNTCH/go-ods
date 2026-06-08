@@ -19,6 +19,8 @@ func parseCell(
 	for _, attr := range start.Attr {
 		switch attr.Name.Local {
 		case "value-type":
+			cell.ValueType = attr.Value
+
 			switch attr.Value {
 			case "string":
 				cell.Type = model.CellTypeString
@@ -28,6 +30,8 @@ func parseCell(
 				cell.Type = model.CellTypeBool
 			case "date":
 				cell.Type = model.CellTypeDate
+			default:
+				cell.Type = model.CellTypeUnknown
 			}
 
 		case "value":

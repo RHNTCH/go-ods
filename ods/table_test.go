@@ -424,6 +424,61 @@ func TestMakeTableParsesTypedCells(t *testing.T) {
 	}
 }
 
+func TestMakeTablePreservesUnknownCellType(t *testing.T) {
+	path := writeTestODS(t, `
+<document>
+  <table name="AP">
+    <table-row>
+      <table-cell value-type="string"><p>price</p></table-cell>
+    </table-row>
+    <table-row>
+      <table-cell value-type="currency" value="100"><p>100 USD</p></table-cell>
+    </table-row>
+  </table>
+</document>
+`)
+
+	reader, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.Close()
+
+	table, err := reader.MakeTable("AP")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cell, ok := table.CellByName(0, "price")
+	if !ok {
+		t.Fatal("CellByName(price) ok = false, want true")
+	}
+
+	if cell.Type != model.CellTypeUnknown {
+		t.Fatalf("Type = %v, want CellTypeUnknown", cell.Type)
+	}
+
+	if cell.ValueType != "currency" {
+		t.Fatalf("ValueType = %s, want currency", cell.ValueType)
+	}
+
+	if cell.Raw != "100" {
+		t.Fatalf("Raw = %s, want 100", cell.Raw)
+	}
+
+	if cell.Formatted != "100 USD" {
+		t.Fatalf("Formatted = %s, want 100 USD", cell.Formatted)
+	}
+
+	value, err := cell.Value()
+	if value != nil {
+		t.Fatalf("Value() = %v, want nil", value)
+	}
+	if !errors.Is(err, model.ErrUndefinedCellType) {
+		t.Fatalf("err = %v, want ErrUndefinedCellType", err)
+	}
+}
+
 func TestMakeTableExpandsRepeatedColumns(t *testing.T) {
 	path := writeTestODS(t, `
 <document>
