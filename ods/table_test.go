@@ -516,3 +516,50 @@ func TestMakeTableExpandsRepeatedColumns(t *testing.T) {
 		}
 	}
 }
+
+func TestMakeTableValueMap(t *testing.T) {
+	path := writeTestODS(t, `
+<document>
+  <table name="AP">
+    <table-row>
+      <table-cell value-type="string"><p>tag</p></table-cell>
+      <table-cell value-type="string"><p>value</p></table-cell>
+      <table-cell value-type="string"><p>enabled</p></table-cell>
+    </table-row>
+    <table-row>
+      <table-cell value-type="string"><p>TT101</p></table-cell>
+      <table-cell value-type="float" value="12.5"><p>12.5</p></table-cell>
+      <table-cell value-type="boolean" boolean-value="true"><p>TRUE</p></table-cell>
+    </table-row>
+  </table>
+</document>
+`)
+
+	reader, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.Close()
+
+	table, err := reader.MakeTable("AP")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	values, err := table.ValueMap(0)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if values["tag"] != "TT101" {
+		t.Fatalf(`want tag "TT101", got %v`, values["tag"])
+	}
+
+	if values["value"] != float64(12.5) {
+		t.Fatalf("want value = 12.5, got %v", values["value"])
+	}
+
+	if values["enabled"] != true {
+		t.Fatalf("want value = true, got %v", values["enabled"])
+	}
+}

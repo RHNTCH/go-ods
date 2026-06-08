@@ -179,6 +179,49 @@ column, ok := table.ColumnByName("object_id")
 cell, ok := table.CellByName(0, "object_tag")
 ```
 
+Use `RequireColumns` before processing when your application expects a
+specific table structure. It returns an error if a column is missing or its
+header is not unique:
+
+```go
+if err := table.RequireColumns("object_id", "object_tag"); err != nil {
+	log.Fatal(err)
+}
+```
+
+`RowMap` returns the cells of one row indexed by their non-empty, unique header
+names:
+
+```go
+row, err := table.RowMap(0)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Println(row["object_tag"].Formatted)
+```
+
+`ValueMap` returns the same row with parsed Go values instead of `model.Cell`
+values. This is useful when generating JSON:
+
+```go
+values, err := table.ValueMap(0)
+if err != nil {
+	log.Fatal(err)
+}
+
+data, err := json.Marshal(values)
+if err != nil {
+	log.Fatal(err)
+}
+
+fmt.Println(string(data))
+```
+
+Both methods return an error for an invalid row index, missing column metadata,
+or duplicate non-empty headers. `ValueMap` also returns an error when a cell
+has an unsupported value type.
+
 ## Typed Cell Values
 
 Cells preserve their displayed text, raw XML value, formula, and parsed type.
@@ -273,5 +316,5 @@ go test ./ods -bench=RealFile -benchmem
 
 - tests for more OpenDocument edge cases;
 - support for additional ODS value types;
-- support for repeated rows;
-- CLI tools and configuration generators built on top of the library.
+- clearer error context for invalid cells and table rows;
+- configuration generators built on top of the library.
