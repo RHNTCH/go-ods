@@ -6,16 +6,26 @@ import (
 )
 
 func getRepeatedColumns(el xml.StartElement) int {
-	repeat := 1
+	return getPositiveIntAttribute(el, "number-columns-repeated")
+}
 
+func getSpannedColumns(el xml.StartElement) int {
+	return getPositiveIntAttribute(el, "number-columns-spanned")
+}
+
+func getSpannedRows(el xml.StartElement) int {
+	return getPositiveIntAttribute(el, "number-rows-spanned")
+}
+
+func getPositiveIntAttribute(el xml.StartElement, name string) int {
 	for _, attr := range el.Attr {
-		if attr.Name.Local == "number-columns-repeated" {
+		if attr.Name.Local == name {
 			n, err := strconv.Atoi(attr.Value)
 			if err == nil && n > 0 {
-				repeat = n
+				return n
 			}
 		}
 	}
 
-	return repeat
+	return 1
 }

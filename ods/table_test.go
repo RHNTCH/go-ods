@@ -563,3 +563,64 @@ func TestMakeTableValueMap(t *testing.T) {
 		t.Fatalf("want value = true, got %v", values["enabled"])
 	}
 }
+
+func TestMakeTableExpandsMergedCells(t *testing.T) {
+	path := writeTestODS(t, `
+<document>
+  <table name="AP">
+    <table-row>
+      <table-cell value-type="string"><p>A</p></table-cell>
+      <table-cell value-type="string"><p>B</p></table-cell>
+      <table-cell value-type="string"><p>C</p></table-cell>
+    </table-row>
+    <table-row>
+      <table-cell value-type="float" value="12.5" number-columns-spanned="2" number-rows-spanned="2"><p>12.5</p></table-cell>
+      <covered-table-cell/>
+      <table-cell value-type="string"><p>first</p></table-cell>
+    </table-row>
+    <table-row>
+      <covered-table-cell number-columns-repeated="2"/>
+      <table-cell value-type="string"><p>second</p></table-cell>
+    </table-row>
+  </table>
+</document>
+`)
+
+	reader, err := Open(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer reader.Close()
+
+	table, err := reader.MakeTable("AP")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if table.Height() != 2 {
+		t.Fatalf("Height() = %d, want 2", table.Height())
+	}
+
+	for rowIndex := range 2 {
+		for columnIndex := range 2 {
+			cell, ok := table.Cell(rowIndex, columnIndex)
+			if !ok {
+				t.Fatalf("Cell(%d, %d) ok = false, want true", rowIndex, columnIndex)
+			}
+
+			if cell.Type != model.CellTypeFloat || cell.Number != 12.5 {
+				t.Fatalf("Cell(%d, %d) = %#v, want float 12.5", rowIndex, columnIndex, cell)
+			}
+		}
+	}
+
+	first, _ := table.Cell(0, 2)
+	if first.Formatted != "first" {
+		t.Fatalf("Cell(0, 2).Formatted = %s, want first", first.Formatted)
+	}
+
+	second, _ := table.Cell(1, 2)
+	if second.Formatted != "second" {
+		t.Fatalf("Cell(1, 2).Formatted = %s, want second", second.Formatted)
+	}
+}

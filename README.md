@@ -22,6 +22,7 @@ Currently supported:
 - reading cell text, raw values, formulas, and basic typed values;
 - preserving unsupported ODS value types for later handling;
 - handling repeated columns;
+- expanding merged cells so every covered position contains the merged value;
 - building an in-memory table from a sheet with `MakeTable`;
 - simple callback helpers for common processing tasks.
 
@@ -29,7 +30,6 @@ Not implemented yet:
 
 - writing ODS files;
 - styles and formatting;
-- merged cells;
 - charts, images, and other embedded objects;
 - full OpenDocument specification coverage.
 
@@ -258,6 +258,11 @@ inside that width are preserved in `Headers`, but they are not added to
 
 This behavior helps ignore empty formatted cells that can appear in ODS files
 when a sheet has styles applied far beyond the actual data range.
+
+Merged cells are expanded while rows are parsed. Every position covered by a
+merged area receives a copy of the top-left cell, including its typed value.
+As a consequence, a merged header produces duplicate header names, which are
+reported as non-unique by `RequireColumns`, `RowMap`, and `ValueMap`.
 
 `MakeTable` stores both row-oriented and column-oriented views of the sheet.
 This uses more memory than streaming iteration, but makes it convenient to read

@@ -10,14 +10,16 @@ import (
 type RowIterator struct {
 	decoder *xml.Decoder
 
-	current model.Row
-	err     error
+	current     model.Row
+	err         error
+	mergedCells map[int]mergedCell
 }
 
 // Rows returns an iterator over rows in the current sheet.
 func (s *SheetCursor) Rows() *RowIterator {
 	return &RowIterator{
-		decoder: s.decoder,
+		decoder:     s.decoder,
+		mergedCells: make(map[int]mergedCell),
 	}
 }
 
@@ -48,7 +50,7 @@ func (it *RowIterator) Next() bool {
 		switch el := token.(type) {
 		case xml.StartElement:
 			if el.Name.Local == "table-row" {
-				it.current = parseRow(it.decoder)
+				it.current = parseRow(it.decoder, it.mergedCells)
 				return true
 			}
 
